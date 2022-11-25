@@ -1,0 +1,323 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <Windows.h>
+#include <conio.h>
+#include <time.h>
+
+struct node
+{
+	char title[50];
+	char name[50];
+	int price;
+	char code[50];
+	struct node *link;
+};
+
+node *head = NULL, *temp;         // p : 선행노드 전 값, phead : 첫 번째 노드
+
+void print(node *head);
+void InputAndPrint(void);
+void Input(void);
+int Search(char titleloc[50]);
+void modify(void);
+void remove(void);
+void Slpprint(int count);
+void TitleSearch(void);
+void CodeSearch(void);
+void quick_sort(node *low, node *high);
+void Case(int input);
+
+void main()
+{
+	int input = 0;
+
+	while (input != 55)
+	{
+		printf("1) 도서정보입력\n2) 도서정보수정\n3) 도서정보삭제\n4) 도서정보검색(도서명)\n5) 도서정보검색(코드명)\n6) 정렬\n7) 종료\n");
+		input = getch();
+		system("cls");
+
+		Case(input);
+	}
+}
+
+void print(node *head)
+{
+	while (head != NULL)
+	{
+		printf("%s \n", head->title);
+		printf("%s \n", head->name);
+		printf("%d \n", head->price);
+		printf("%s \n", head->code);
+		printf("\n");
+		head = head->link;
+	}
+}
+
+void InputAndPrint(void)
+{
+	printf("title : ");
+	gets_s(temp->title);
+	printf("name : ");
+	gets_s(temp->name);
+	printf("price : ");
+	scanf("%d", &temp->price);
+	fflush(stdin);
+	printf("code : ");
+	gets_s(temp->code);
+	system("cls");
+}
+
+void Input(void)
+{
+	if (head == NULL) {
+		head = (node *)malloc(sizeof(node));
+		printf("title : ");
+		gets_s(head->title);
+		printf("name : ");
+		gets_s(head->name);
+		printf("price : ");
+		scanf("%d", &head->price);
+		fflush(stdin);
+		printf("code : ");
+		gets_s(head->code);
+		head->link = NULL;
+		system("cls");
+
+		printf("%s\n", head->title);
+		printf("%s\n", head->name);
+		printf("%d\n", head->price);
+		printf("%s\n\n", head->code);
+	}
+
+	else {
+		temp = head;
+
+		while (temp->link != NULL) {
+			temp = temp->link;
+		}
+
+		temp->link = (node *)malloc(sizeof(node));
+		temp = temp->link;
+
+		InputAndPrint();
+
+		temp->link = NULL;
+		system("cls");
+
+		print(head);
+	}
+}
+
+int Search(char titleloc[50])
+{
+	int count = 0;
+
+	while (temp != NULL)
+	{
+		if (strcmp(titleloc, temp->title) == 0)
+		{
+			count = 1;
+			break;
+		}
+		temp = temp->link;
+	}
+	return count;
+}
+
+void modify(void)
+{
+	int count = 0;
+	char titleloc[50];
+
+	if (head == NULL) printf("현재 입력된 도서명이 없습니다.\n");
+
+	else {
+		temp = head;
+
+		printf("수정할 도서명 입력 : ");
+		gets_s(titleloc);
+
+		count = Search(titleloc);
+
+		if (count == 0) printf("존재하지 않음\n");
+		else {
+			printf("-수정할 값 입력-\n");
+			InputAndPrint();
+		}
+		print(head);
+	}
+}
+
+void remove(void)
+{
+	int count = 0;
+	char titleloc[50];
+	node *p = NULL, **phead = &head;
+
+	if (head == NULL) printf("현재 입력된 도서명이 없습니다.\n");
+
+	else {
+		temp = head;
+
+		printf("삭제할 도서명 입력 : ");
+		gets_s(titleloc);
+
+		while (temp != NULL)
+		{
+			if (strcmp(titleloc, temp->title) == 0)
+			{
+				temp = temp->link;
+				count = 1;
+				break;
+			}
+			else {
+				p = temp;
+				temp = temp->link;
+			}
+		}
+
+		if (count == 0) printf("존재하지 않음\n");
+		else {
+			if (p == NULL) *phead = temp;
+			else p->link = temp;
+		}
+	}
+	system("cls");
+	print(head);
+}
+
+void Slpprint(int count)
+{
+	if (count == 0) printf("존재하지 않음\n");
+	else if (count == 1) {
+		printf("%s\n", temp->title);
+		printf("%s\n", temp->name);
+		printf("%d\n", temp->price);
+		printf("%s\n", temp->code);
+		Sleep(2000);
+		system("cls");
+		printf("\n");
+	}
+}
+
+void TitleSearch(void)
+{
+	int count = 0;
+	char titleloc[50];
+
+	temp = head;
+	printf("검색할 도서명 : ");
+	gets_s(titleloc);
+
+	count = Search(titleloc);
+
+	Slpprint(count);
+}
+
+void CodeSearch(void)
+{
+	int count = 0;
+	char codeloc[50];
+
+	temp = head;
+
+	printf("검색할 코드명 : ");
+	gets_s(codeloc);
+
+	while (temp != NULL)
+	{
+		if (strcmp(codeloc, temp->code) == 0)
+		{
+			count = 1;
+			break;
+		}
+		else temp = temp->link;
+	}
+	Slpprint(count);
+}
+
+void quick_sort(node *low, node *high)
+{
+	node *left = low, *right = NULL, *p = NULL;
+	int v, temp, cnt = 0;
+
+	if (low == NULL || low == high || low->link == high) { return; }
+	p = (node *)malloc(sizeof(node));
+	right = low->link;
+	v = low->price;
+
+	while (right != high)
+	{
+		if (right->price <= v)
+		{
+			if (left->link != right)
+			{
+				p->price = right->price;
+				strcpy(p->code, right->code);
+				strcpy(p->name, right->name);
+				strcpy(p->title, right->title);
+
+				right->price = left->link->price;
+				strcpy(right->code, left->link->code);
+				strcpy(right->name, left->link->name);
+				strcpy(right->title, left->link->title);
+
+				left->link->price = p->price;
+				strcpy(left->link->code, p->code);
+				strcpy(left->link->name, p->name);
+				strcpy(left->link->title, p->title);
+			}
+			left = left->link;
+		}
+		right = right->link;
+	}
+
+	if (low != left)
+	{
+		p->price = low->price;
+		strcpy(p->code, low->code);
+		strcpy(p->name, low->name);
+		strcpy(p->title, low->title);
+
+		low->price = left->price;
+		strcpy(low->code, left->code);
+		strcpy(low->name, left->name);
+		strcpy(low->title, left->title);
+
+		left->price = p->price;
+		strcpy(left->code, p->code);
+		strcpy(left->name, p->name);
+		strcpy(left->title, p->title);
+	}
+
+	quick_sort(low, left);
+	quick_sort(left->link, high);
+	printf("%d번\n\n", cnt);
+}
+
+void Case(int input)
+{
+	switch (input)
+	{
+	case 49:                          // 입력
+		Input(); break;
+
+	case 50:                          // 수정
+		modify(); break;
+
+	case 51:                          // 삭제
+		remove(); break;
+
+	case 52:                          // 도서명 검색
+		TitleSearch(); break;
+
+	case 53:                          // 코드 검색
+		CodeSearch(); break;
+
+	case 54:                          // 퀵소트
+		system("cls");
+		quick_sort(head, nullptr);
+		print(head); break;
+	}
+}
