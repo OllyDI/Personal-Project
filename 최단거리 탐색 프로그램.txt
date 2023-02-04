@@ -1,0 +1,344 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <Windows.h>
+#include <conio.h>
+
+#define LEFT 75
+#define RIGHT 77
+#define UP 72
+#define DOWN 80
+#define ENTER 13 // 탐색
+#define SPACE 32 // 초기화
+#define ESC 27   // 종료
+#define GOAL 2
+#define START 3
+
+struct node {
+	int x;
+	int y;
+	int cnt;
+
+	struct node *link;
+};
+
+node *head = NULL, *temp, **phead = &head;
+int strt_x, strt_y, goal_x, goal_y;
+int Initialize_map[10][10] = { 0 };  //초기화 시
+int map[10][10] = {
+	{ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+	{ 0, 1, 0, 1, 1, 1, 1, 1, 1, 0 },
+	{ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
+	{ 1, 1, 1, 1, 0, 1, 0, 1, 1, 1 },
+	{ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
+	{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+	{ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
+	{ 1, 1, 1, 1, 0, 1, 0, 1, 1, 1 },
+	{ 0, 0, 0, 1, 0, 1, 0, 1, 0, 0 },
+	{ 0, 1, 0, 0, 0, 0, 0, 0, 0, 1 },
+};
+
+
+void Copy_map()       // 초기 맵 백업
+{
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 10; j++)
+		{
+			Initialize_map[i][j] = map[i][j];
+		}
+	}
+}
+void Initialize()     //맵 초기화
+{
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 10; j++)
+		{
+			map[i][j] = Initialize_map[i][j];
+		}
+	}
+	temp = head = NULL;
+}
+
+void Create_Coordi()
+{
+	int x, y;
+
+	while (1)  // 도착지점
+	{
+		//x = rand() % 10;
+		//y = rand() % 10;
+		x = 0;
+		y = 0;
+		if (map[x][y] == 0) {
+			map[goal_x = x][goal_y = y] = GOAL;
+			break;
+		}
+	}
+	while (1)
+	{
+		x = rand() % 10;
+		y = rand() % 10;
+
+		if (map[x][y] == 0) {
+			map[strt_x = x][strt_y = y] = START;
+			break;
+		}
+	}
+}
+
+void Create_map()
+{
+	printf("┌─────────────────────────────────────┐\n");
+	printf("│                   최 단 거 리   탐 색   프 로 그 램                      │\n");
+	printf("│─────────────────────────────────────│\n");
+	printf("│  ▲ ▼ ◀ ▶ : 이동   ENTER : 탐색시작   SPACE : 초기화   ESC : 종료     │\n");
+	printf("└─────────────────────────────────────┘\n");
+
+
+	printf("\n\n");
+	for (int i = 0; i < 10; i++)
+	{
+		printf("\t");
+		for (int j = 0; j < 10; j++)
+		{
+			if (map[i][j] == 1) printf("■");
+			else if (map[i][j] == 2) printf("★");
+			else if (map[i][j] == 3) printf("☆");
+			else printf("□");
+		}
+		printf("\n");
+	}
+}
+
+int Condition_sub(int Coordi)
+{
+	map[strt_x][strt_y] = 0;
+	return Coordi -= 1;
+}
+int Condition_add(int Coordi)
+{
+	map[strt_x][strt_y] = 0;
+	return Coordi += 1;
+}
+
+int Shortest_Path_Search() // 순서는 아래-오른쪽-위-왼쪽 : 반시계 방향
+{
+	int num = 0;
+	bool pw = true;
+
+	while (pw) {
+		if (head == NULL) {
+			if (map[goal_x + 1][goal_y] == 0 && goal_x + 1 < 10) {
+				head = (node *)malloc(sizeof(node));
+				head->x = goal_x + 1;
+				head->y = goal_y;
+				map[head->x][head->y] = head->cnt = 4;
+				head->link = NULL;
+			}
+			if (head != NULL) temp = head;
+
+			if (map[goal_x][goal_y + 1] == 0 && goal_y + 1 < 10) {
+				if (head == NULL) temp = head = (node *)malloc(sizeof(node));
+				else temp = temp->link = (node *)malloc(sizeof(node));
+				temp->x = goal_x;
+				temp->y = goal_y + 1;
+				map[temp->x][temp->y] = temp->cnt = 4;
+				temp->link = NULL;
+			}
+			if (map[goal_x - 1][goal_y] == 0 && goal_x - 1 >= 0) {
+				if (head == NULL) temp = head = (node *)malloc(sizeof(node));
+				else temp = temp->link = (node *)malloc(sizeof(node));
+				temp->x = goal_x - 1;
+				temp->y = goal_y;
+				map[temp->x][temp->y] = temp->cnt = 4;
+				temp->link = NULL;
+			}
+
+			if (map[goal_x][goal_y - 1] == 0 && goal_y - 1 >= 0) {
+				if (head == NULL) temp = head = (node *)malloc(sizeof(node));
+				else temp = temp->link = (node *)malloc(sizeof(node));
+				temp->x = goal_x;
+				temp->y = goal_y - 1;
+				map[temp->x][temp->y] = temp->cnt = 4;
+				temp->link = NULL;
+			}
+		}
+
+		else {
+			if ((map[head->x + 1][head->y] == START && head->x < 9) || (map[head->x - 1][head->y] == START && head->x > 0) ||
+				(map[head->x][head->y + 1] == START && head->y < 9) || (map[head->x][head->y - 1] == START && head->y > 0))
+			{
+				num = head->cnt;
+				printf("\n\n\t탐색을 완료했습니다. 거리 : %d블럭...", num - 2);
+				Sleep(1000);
+				pw = false;
+			}
+			else {
+				temp = head;
+				while (temp->link != NULL) {
+					temp = temp->link;
+				}
+				if (map[head->x + 1][head->y] == 0 && head->x + 1 < 10) {
+					temp->link = (node *)malloc(sizeof(node));
+					temp = temp->link;
+					temp->x = head->x + 1;
+					temp->y = head->y;
+					map[temp->x][temp->y] = temp->cnt = head->cnt + 1;
+					temp->link = NULL;
+				}
+				if (map[head->x][head->y + 1] == 0 && head->y + 1 < 10) {
+					temp = temp->link = (node *)malloc(sizeof(node));
+					temp->x = head->x;
+					temp->y = head->y + 1;
+					map[temp->x][temp->y] = temp->cnt = head->cnt + 1;
+					temp->link = NULL;
+				}
+				if (map[head->x - 1][head->y] == 0 && head->x - 1 >= 0) {
+					temp = temp->link = (node *)malloc(sizeof(node));
+					temp->x = head->x - 1;
+					temp->y = head->y;
+					map[temp->x][temp->y] = temp->cnt = head->cnt + 1;
+					temp->link = NULL;
+				}
+				if (map[head->x][head->y - 1] == 0 && head->y - 1 >= 0) {
+					temp = temp->link = (node *)malloc(sizeof(node));
+					temp->x = head->x;
+					temp->y = head->y - 1;
+					map[temp->x][temp->y] = temp->cnt = head->cnt + 1;
+					temp->link = NULL;
+				}
+				if (head->link != NULL) *phead = head->link;
+				else if (head->link == NULL) *phead = NULL;
+			}
+		}
+
+	}
+
+	return num;
+}
+
+void move(int num)
+{
+	bool PW = true;
+
+	while (PW)
+	{
+		system("cls");
+		Create_map();
+		printf("\n\n\t도착 지점까지 거리 : %d블럭...", num - 2);
+		Sleep(300);
+		if (map[strt_x + 1][strt_y] == GOAL || map[strt_x - 1][strt_y] == GOAL ||
+			map[strt_x][strt_y + 1] == GOAL || map[strt_x][strt_y - 1] == GOAL)
+		{
+			map[strt_x][strt_y] = 0;
+			map[goal_x][goal_y] = START;
+			PW = false;
+		}
+
+		else {
+			if (map[strt_x + 1][strt_y] == num)
+			{
+				map[strt_x + 1][strt_y] = map[strt_x][strt_y];
+				strt_x = Condition_add(strt_x);
+			}
+			else if (map[strt_x - 1][strt_y] == num)
+			{
+				map[strt_x - 1][strt_y] = map[strt_x][strt_y];
+				strt_x = Condition_sub(strt_x);
+			}
+			else if (map[strt_x][strt_y + 1] == num)
+			{
+				map[strt_x][strt_y + 1] = map[strt_x][strt_y];
+				strt_y = Condition_add(strt_y);
+			}
+			else if (map[strt_x][strt_y - 1] == num)
+			{
+				map[strt_x][strt_y - 1] = map[strt_x][strt_y];
+				strt_y = Condition_sub(strt_y);
+			}
+			num--;
+		}
+	}
+}
+
+void Control()
+{
+	int mov = 0;
+	bool PW = true;
+
+	while (PW)
+	{
+		mov = getch();
+		if (mov == 0xE0 || mov == 0) mov = getch();
+
+		switch (mov)
+		{
+		case LEFT:
+			if (strt_y > 0 && map[strt_x][strt_y - 1] != 1 && map[strt_x][strt_y - 1] != 2)
+			{
+				strt_y = Condition_sub(strt_y);
+				map[strt_x][strt_y] = 3;
+			}
+			break;
+
+		case RIGHT:
+			if (strt_y < 9 && map[strt_x][strt_y + 1] != 1 && map[strt_x][strt_y + 1] != 2)
+			{
+				strt_y = Condition_add(strt_y);
+				map[strt_x][strt_y] = 3;
+			}
+			break;
+
+		case UP:
+			if (strt_x > 0 && map[strt_x - 1][strt_y] != 1 && map[strt_x - 1][strt_y] != 2)
+			{
+				strt_x = Condition_sub(strt_x);
+				map[strt_x][strt_y] = 3;
+			}
+			break;
+
+		case DOWN:
+			if (strt_x < 9 && map[strt_x + 1][strt_y] != 1 && map[strt_x + 1][strt_y] != 2)
+			{
+				strt_x = Condition_add(strt_x);
+				map[strt_x][strt_y] = 3;
+			}
+			break;
+
+		case ENTER:
+			printf("\n\t최단거리 탐색을 시작합니다...");
+			Sleep(1000);
+			move(Shortest_Path_Search());
+			break;
+
+		case SPACE:
+			printf("\n\t맵을 초기화 합니다...");
+			Sleep(1500);
+			Initialize();
+			Create_Coordi();
+			break;
+
+		case ESC:
+			PW = false;
+			printf("\n\t프로그램을 종료합니다...");
+			Sleep(1000);
+			break;
+		}
+		system("cls");
+		Create_map();
+	}
+	system("cls");
+}
+
+void main()
+{
+	int num = 0;
+
+	srand(time(NULL));
+	Copy_map();
+	Create_Coordi();
+	Create_map();
+	Control();
+}
